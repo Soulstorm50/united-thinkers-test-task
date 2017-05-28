@@ -1,0 +1,163 @@
+
+<?page title="Auto Generated index.zul"?>
+
+		<window title="Soulstorm's Sale request form =)" border="normal" width="600px" height="600px">
+			<separator/>
+				<label value="Card Number"/>
+			<separator/>
+					<longbox id="card_number" constraint="no empty" maxlength="16" tooltiptext="Type 16 digit bank card number"/>
+			<separator/>	
+				<label value="Exp Date (MM/YY)"/>	
+			<separator/>
+				<combobox id="month" maxlength="2" constraint="no empty" tooltiptext="Choose Exp Date month of you bank card">
+				<comboitem label="01"/>
+				<comboitem label="02"/>
+				<comboitem label="03"/>
+				<comboitem label="04"/>
+				<comboitem label="05"/>
+				<comboitem label="06"/>
+				<comboitem label="07"/>
+				<comboitem label="08"/>
+				<comboitem label="09"/>
+				<comboitem label="10"/>
+				<comboitem label="11"/>
+				<comboitem label="12"/>
+				</combobox>
+				<combobox id="year" maxlength="2" constraint="no empty" tooltiptext="Choose Exp Date year of you bank card">
+				<comboitem label="17"/>
+				<comboitem label="18"/>
+				<comboitem label="19"/>
+				<comboitem label="20"/>
+				<comboitem label="21"/>
+				<comboitem label="22"/>
+				<comboitem label="23"/>
+				<comboitem label="24"/>
+				<comboitem label="25"/>
+				<comboitem label="26"/>
+				<comboitem label="27"/>
+				</combobox>		
+			<separator/>
+				<label value="CSC Code"/>
+			<separator/>
+					<intbox id="csc_code" maxlength="3" tooltiptext="Optional. Type 3 digit secret CVV code"/>
+			<separator/>
+				<label value="Amount" />
+			<separator/>
+					<longbox id="amount" constraint="no empty" tooltiptext="Type amount of purchase in USD. Example: 999" format="" maxlength="6"/>
+				<label value="USD"/>
+			<separator/>
+				<label value="Holder Name"/>
+			<separator/>
+					<textbox id="holder_name" constraint="no empty" tooltiptext="Type cardholder name. Example: Jack Sparrov"/>
+			<separator/>
+				<label value="Street"/>
+			<separator/>
+					<textbox id="street" constraint="no empty" tooltiptext="Type street address. Example : 1540 Dancy Rd"/>
+			<separator/>
+				<label value="City"/>
+			<separator/>
+					<textbox id="city" constraint="no empty" tooltiptext="Type city. Example: San Diego"/>
+			<separator/>
+				<label value="State"/>
+			<separator/>
+					<textbox id="state" constraint="no empty" tooltiptext="Type state. Example: California"/>
+			<separator/>
+				<label value="ZipCode"/>
+			<separator/>
+					<intbox id="zip_code" constraint="no empty" maxlength="5" tooltiptext="Type Zipcode. Example: 92126"/>
+			<separator/>
+
+	<button label="Sale" id="send_sale_rqst">
+
+
+		<zscript language="Java">
+		    
+		
+			import java.io.BufferedReader;
+			import java.io.IOException;
+			import java.io.InputStreamReader;
+			import java.net.URL;
+			
+			
+
+					<!--This function is send URL request and return answer(String)-->
+
+			public String saleRequest(String saleRqsStr) throws IOException {
+	
+				URL saleRqsURL = new URL(saleRqsStr);
+    			BufferedReader in = new BufferedReader(new InputStreamReader(saleRqsURL.openStream()));
+    			String inputLine;
+    			String s = "";
+    			while ((inputLine = in.readLine()) != null){
+        			s += inputLine;}
+    			in.close();
+    			return s;}
+    			
+    			
+    			<!--This function is return sale result-->
+    			
+    			public String saleResponse(String response) {
+        		String result = "";
+        	    char ch = '\u0026';
+        		String amper = "" + ch;
+       			String[] parts = response.split(amper);
+   
+        		if (parts[0].split("=")[1].equals("sale")){
+            	result = parts[2].split("=")[1].replaceAll("\\+", " ");
+        		} else {
+            	result = "Oops! Looks like wrong Card/Account Information. Try again.";
+        		}
+        		return result;
+    			}
+    			
+         </zscript>
+
+	<attribute name="onClick"><![CDATA[
+	                                
+	                
+	//Values from the SaleForm fields                                   
+	String cardNum = "accountNumber=" + card_number.getText();      
+	String expDate = "accountAccessory=" + month.getText() + year.getText();                  
+	String csc = "csc=" + csc_code.getText();                      
+	String amnt = "amount=" + amount.getText() + "00";                        
+	String holderName = "holderName=" + holder_name.getText().replaceAll(" ", "+");                        
+	String str = street.getText();
+	String city1 = city.getText();
+	String sta = state.getText();
+	String zip = zip_code.getText();
+	
+	//Other values for sale request
+	String merchant = "merchantAccountCode=829001";
+	String password = "password=1sPlP291P3GVJCD1b3vtU07B1i2bOJKt";
+	String reqType = "requestType=sale";		
+	String accType = "accountType=R";
+	String transIndType = "transactionIndustryType=RE";
+	String userName = "userName=TestServiceUser";
+	
+	
+	//This part of code is build a string with URL request
+	StringBuilder sb = new StringBuilder();
+	sb.append("https://sandbox-secure.unitedthinkers.com/gates/xurl?")
+	.append(merchant).append("&")
+	.append(password).append("&")
+	.append(csc).append("&")
+	.append(amnt).append("&")
+	.append(holderName).append("&")
+	.append(reqType).append("&")
+	.append(accType).append("&")
+	.append(expDate).append("&")
+	.append(transIndType).append("&")
+	.append(userName).append("&")
+	.append(cardNum);
+	
+	//System.out.println(sb.toString());
+	//System.out.println(saleRequest(sb.toString()));
+	
+    //Messagebox with result
+Messagebox.show(saleResponse(saleRequest(sb.toString())), "click", Messagebox.OK, Messagebox.EXCLAMATION);                           	
+	
+					]]></attribute>
+			</button>
+		<separator/>
+	</window>
+
